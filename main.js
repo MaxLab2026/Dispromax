@@ -1,3 +1,5 @@
+// 🔥 NIVEL PRO - APP DISTRIBUIDORA (UX + CLIENTES + CATEGORÍAS)
+
 const supabaseUrl = "https://cosxgumrxgihkeszvgwu.supabase.co";
 const supabaseKey = "sb_publishable_B58gh4o9vrHK58hNramtGw_yRck0jwX";
 
@@ -8,59 +10,161 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 const app = document.getElementById("app");
 
 let carrito = [];
+let productos = [];
+let clientes = [];
+let clienteSeleccionado = null;
 
-async function cargarProductos() {
-  const { data } = await supabase.from("products").select("*");
-
+function layout(content) {
   app.innerHTML = `
-    <h1>Distribuidora</h1>
-    <h2>Productos</h2>
-    ${data
-      .map(
-        (p) => `
-      <button onclick="agregar('${p.id}', '${p.name}', ${p.price}, ${p.stock})">
-        ${p.name} - $${p.price}
-      </button>
-    `
-      )
-      .join("")}
-    <h2>Carrito</h2>
-    <div id="carrito"></div>
-    <h3 id="total"></h3>
-    <button onclick="guardarPedido()">Guardar Pedido</button>
+    <div style="font-family:sans-serif;padding:15px;max-width:500px;margin:auto;">
+      <h2 style="text-align:center;">Distribuidora</h2>
+      ${content}
+    </div>
   `;
 }
 
-window.agregar = (id, name, price, stock) => {
+async function init() {
+  const { data: prod } = await supabase.from("products").select("*");
+  const { data: cli } = await supabase.from("customers").select("*");
+
+  productos = prod || [];
+  clientes = cli || [];
+
+  render();
+}
+
+function render() {
+  layout(`
+    ${renderClientes()}
+    ${renderProductos()}
+    ${renderCarrito()}
+  `);
+}
+
+function renderClientes() {
+  return `
+    <h3>Cliente</h3>
+    <select onchange="seleccionarCliente(this.value)" style="width:100%;padding:10px;margin-bottom:10px;">
+      <option value="">Seleccionar cliente</option>
+      ${clientes
+        .map(
+          (c) => `<option value="${c.id}">${c.name}</option>`
+        )
+        .join("")}
+    </select>
+  `;
+}
+
+window.seleccionarCliente = (id) => {
+  clienteSeleccionado = id;
+};
+
+function renderProductos() {
+  return `
+    <h3>Productos</h3>
+    <input placeholder="Buscar..." oninput="buscar(this.value)" style="width:100%;padding:10px;margin-bottom:10px;" />
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      ${productos
+        .map(
+          (p) => `
+        <div onclick="agregar('${p.id}')"
+          style="border-radius:10px;padding:12px;background:#f5f5f5;">
+          <strong>${p.name}</strong><br>
+          <span>$${p.price}</span>
+        </div>
+      `
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+window.buscar = (texto) => {
+  const filtrados = productos.filter((p) =>
+    p.name.toLowerCase().includes(texto.toLowerCase())
+  );
+
+  document.querySelector("div[style*='grid']").innerHTML = filtrados
+    .map(
+      (p) => `
+    <div onclick="agregar('${p.id}')"
+      style="border-radius:10px;padding:12px;background:#f5f5f5;">
+      <strong>${p.name}</strong><br>
+      <span>$${p.price}</span>
+    </div>
+  `
+    )
+    .join("");
+};
+
+window.agregar = (id) => {
+  const p = productos.find((x) => x.id === id);
+
   const existe = carrito.find((i) => i.id === id);
 
   if (existe) {
     existe.cantidad++;
   } else {
-    carrito.push({ id, name, price, stock, cantidad: 1 });
+    carrito.push({ ...p, cantidad: 1 });
   }
 
-  renderCarrito();
+  render();
 };
 
 function renderCarrito() {
-  const div = document.getElementById("carrito");
-
-  div.innerHTML = carrito
-    .map((i) => `${i.name} x${i.cantidad}`)
-    .join("<br>");
-
   const total = carrito.reduce((acc, i) => acc + i.price * i.cantidad, 0);
 
-  document.getElementById("total").innerText = "Total: $" + total;
+  return `
+    <h3>Carrito</h3>
+    ${carrito
+      .map(
+        (i, index) => `
+      <div style="display:flex;justify-content:space-between;background:#eee;padding:8px;margin:5px 0;border-radius:8px;">
+        <div>
+          ${i.name}<br>
+          <small>x${i.cantidad}</small>
+        </div>
+        <div>
+          $${i.price * i.cantidad}
+          <button onclick="eliminar(${index})">❌</button>
+        </div>
+      </div>
+    `
+      )
+      .join("")}
+
+    <h2>Total: $${total}</h2>
+
+    <button onclick="guardarPedido()"
+      style="width:100%;padding:15px;background:black;color:white;border:none;border-radius:10px;">
+      Guardar Pedido
+    </button>
+  `;
 }
 
+window.eliminar = (index) => {
+  carrito.splice(index, 1);
+  render();
+};
+
 window.guardarPedido = async () => {
+  if (!clienteSeleccionado)
+    return alert("Selecciona un cliente");
+
+  if (carrito.length === 0)
+    return alert("Carrito vacío");
+
   const total = carrito.reduce((acc, i) => acc + i.price * i.cantidad, 0);
 
   const { data: order } = await supabase
     .from("orders")
-    .insert([{ total, status: "CONFIRMADO" }])
+    .insert([
+      {
+        customer_id: clienteSeleccionado,
+        total,
+        status: "CONFIRMADO",
+      },
+    ])
     .select()
     .single();
 
@@ -81,8 +185,9 @@ window.guardarPedido = async () => {
   }
 
   alert("Pedido guardado");
+
   carrito = [];
-  cargarProductos();
+  render();
 };
 
-cargarProductos();
+init();
