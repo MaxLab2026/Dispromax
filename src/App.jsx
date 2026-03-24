@@ -115,7 +115,7 @@ function App() {
       const { data: order, error } = await supabase
         .from('orders')
         .insert({
-          customer_id: customer.id,
+          cliente_id: customer.id,
           total: finalTotal,
           estado: 'pendiente'
         })
