@@ -13,15 +13,20 @@ export default function CustomerForm() {
   useEffect(() => {
     if (!showCustomerModal) return
     const loadCustomers = async () => {
-      const { data } = await supabase.from('customers').select('*').order('nombre')
-      setCustomers(data || [])
+      const { data, error } = await supabase.from('customers').select('*').order('nombre')
+      if (error) {
+        console.error(error)
+        setCustomers([])
+      } else {
+        setCustomers(data || [])
+      }
     }
     loadCustomers()
   }, [showCustomerModal])
 
   const filteredCustomers = customers.filter(c => 
-    c.nombre.toLowerCase().includes(search.toLowerCase()) ||
-    c.telefono.includes(search)
+    (c.nombre?.toLowerCase() || '').includes(search.toLowerCase()) ||
+    (c.telefono || '').includes(search)
   )
 
   const handleSelect = (cust) => {
@@ -36,9 +41,10 @@ export default function CustomerForm() {
       return
     }
     setLoading(true)
+    const cleanPhone = newCustomer.telefono.replace(/\s+/g, '')
     const { data, error } = await supabase
       .from('customers')
-      .insert(newCustomer)
+      .insert({ ...newCustomer, telefono: cleanPhone })
       .select()
       .single()
     
@@ -74,19 +80,23 @@ export default function CustomerForm() {
 
           {/* Lista clientes */}
           <div className="max-h-64 overflow-auto space-y-2 mb-8">
-            {filteredCustomers.map(c => (
-              <div
-                key={c.id}
-                onClick={() => handleSelect(c)}
-                className="flex justify-between items-center px-6 py-4 hover:bg-slate-50 rounded-3xl cursor-pointer border border-transparent hover:border-slate-200"
-              >
-                <div>
-                  <p className="font-medium">{c.nombre}</p>
-                  <p className="text-sm text-slate-400">{c.telefono}</p>
+            {filteredCustomers.length > 0 ? (
+              filteredCustomers.map(c => (
+                <div
+                  key={c.id}
+                  onClick={() => handleSelect(c)}
+                  className="flex justify-between items-center px-6 py-4 hover:bg-slate-50 rounded-3xl cursor-pointer border border-transparent hover:border-slate-200"
+                >
+                  <div>
+                    <p className="font-medium">{c.nombre || 'Sin nombre'}</p>
+                    <p className="text-sm text-slate-400">{c.telefono || 'Sin teléfono'}</p>
+                  </div>
+                  <span className="text-primary">Seleccionar →</span>
                 </div>
-                <span className="text-primary">Seleccionar →</span>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-slate-400 text-sm">No hay clientes registrados</p>
+            )}
           </div>
 
           {/* Crear nuevo */}
