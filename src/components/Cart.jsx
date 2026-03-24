@@ -3,19 +3,21 @@ import { useApp } from '../App'
 
 export default function Cart() {
   const { 
-    cart, 
-    updateCartQty, 
-    removeFromCart, 
-    cartTotal, 
-    finalTotal, 
-    discount, 
-    setDiscount, 
-    customer, 
-    createOrder,
-    loading 
-  } = useApp()
-
-  const handleDiscountChange = (e) => {
+  cart, 
+  updateCartQty, 
+  removeFromCart, 
+  cartTotal, 
+  finalTotal, 
+  discount, 
+  setDiscount, 
+  customer, 
+  createOrder,
+  loading,
+  currentOrder,
+  setCurrentOrder,
+  generatePDF
+} = useApp()
+const handleDiscountChange = (e) => {
     const value = parseFloat(e.target.value) || 0
     setDiscount(prev => ({ ...prev, value }))
   }
