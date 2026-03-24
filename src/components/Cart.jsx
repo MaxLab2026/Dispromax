@@ -15,7 +15,7 @@ export default function Cart() {
   loading,
   currentOrder,
   setCurrentOrder,
-  generatePDF
+  generatePDF,
   clearCart
 } = useApp()
 const handleDiscountChange = (e) => {
