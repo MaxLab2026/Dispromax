@@ -10,6 +10,7 @@ export default function Dashboard() {
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(true)
 
   // Modal de pagos
@@ -17,6 +18,9 @@ export default function Dashboard() {
   const [currentOrder, setCurrentOrder] = useState(null)
   const [paymentAmount, setPaymentAmount] = useState(0)
   const [paymentMethod, setPaymentMethod] = useState('efectivo')
+
+  // Expandir historial de pagos
+  const [expandedOrderId, setExpandedOrderId] = useState(null)
 
   useEffect(() => {
     fetchOrders()
@@ -68,9 +72,15 @@ export default function Dashboard() {
         return estado === statusFilter
       })
     }
+    if (searchTerm) {
+      result = result.filter(o =>
+        (o.customers?.nombre || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        o.id.toString().includes(searchTerm)
+      )
+    }
 
     setFilteredOrders(result)
-  }, [orders, dateFrom, dateTo, statusFilter])
+  }, [orders, dateFrom, dateTo, statusFilter, searchTerm])
 
   // Estadísticas dinámicas
   const totalVentas = filteredOrders.reduce((acc, o) => {
@@ -138,6 +148,13 @@ export default function Dashboard() {
           <option value="parcial">Parcial</option>
           <option value="pagado">Pagado</option>
         </select>
+        <input
+          type="text"
+          placeholder="Buscar por cliente o pedido..."
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+          className="bg-slate-100 rounded-2xl px-5 py-3 flex-1"
+        />
         <button onClick={fetchOrders} className="btn-primary px-8">Actualizar</button>
       </div>
 
@@ -167,19 +184,7 @@ export default function Dashboard() {
                                saldoPendiente < (order.total || 0) ? 'parcial' : 'pendiente'
 
                 return (
-                  <tr key={order.id} className="border-t hover:bg-slate-50">
-                    <td className="px-8 py-5 font-medium">#{order.id}</td>
-                    <td className="px-8 py-5">{order.customers?.nombre || 'Sin cliente'}</td>
-                    <td className="px-8 py-5 text-slate-400 text-sm">
-                      {order.created_at ? new Date(order.created_at).toLocaleDateString('es-CO') : 'Sin fecha'}
-                    </td>
-                    <td className="px-8 py-5 text-right font-semibold">
-                      ${(order.total || 0).toLocaleString('es-CO')}
-                    </td>
-                    <td className="px-8 py-5 text-right text-emerald-600">
-                      ${totalPagado.toLocaleString('es-CO')}
-                    </td>
-                    <td className="px-8 py-5 text-right text-orange-600">
-                      ${saldoPendiente.toLocaleString('es-CO')}
-                    </td>
-                    <td className
+                  <>
+                    <tr key={order.id} className="border-t hover:bg-slate-50">
+                      <td className="px-8 py-5 font-medium">#{order.id}</td>
+                      <td className="px-8 py-5">{order.customers?.nombre || '
