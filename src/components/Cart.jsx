@@ -16,6 +16,7 @@ export default function Cart() {
   currentOrder,
   setCurrentOrder,
   generatePDF
+  clearCart
 } = useApp()
 const handleDiscountChange = (e) => {
     const value = parseFloat(e.target.value) || 0
