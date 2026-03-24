@@ -13,7 +13,10 @@ export default function CustomerForm() {
   useEffect(() => {
     if (!showCustomerModal) return
     const loadCustomers = async () => {
-      const { data, error } = await supabase.from('customers').select('*').order('nombre')
+      const { data, error } = await supabase
+        .from('customers')
+        .select('*')
+        .order('nombre')
       if (error) {
         console.error(error)
         setCustomers([])
@@ -68,18 +71,26 @@ export default function CustomerForm() {
           <button onClick={() => setShowCustomerModal(false)} className="text-3xl leading-none text-slate-300">×</button>
         </div>
         
-        <div className="p-6">
+        <div className="p-6 space-y-6">
+          {/* Botón registrar nuevo */}
+          <button
+            onClick={() => document.getElementById('newCustomerForm').scrollIntoView({ behavior: 'smooth' })}
+            className="btn-secondary w-full"
+          >
+            ➕ Registrar nuevo cliente
+          </button>
+
           {/* Buscador */}
           <input
             type="text"
             placeholder="Buscar cliente por nombre o teléfono..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full rounded-3xl bg-slate-100 px-6 py-4 text-lg mb-6"
+            className="w-full rounded-3xl bg-slate-100 px-6 py-4 text-lg"
           />
 
           {/* Lista clientes */}
-          <div className="max-h-64 overflow-auto space-y-2 mb-8">
+          <div className="max-h-64 overflow-auto space-y-2">
             {filteredCustomers.length > 0 ? (
               filteredCustomers.map(c => (
                 <div
@@ -102,7 +113,7 @@ export default function CustomerForm() {
           {/* Crear nuevo */}
           <div className="border-t pt-6">
             <h3 className="text-sm uppercase mb-4 text-slate-400">Crear cliente rápido</h3>
-            <form onSubmit={handleCreateNew} className="space-y-4">
+            <form id="newCustomerForm" onSubmit={handleCreateNew} className="space-y-4">
               <input
                 type="text"
                 placeholder="Nombre completo"
