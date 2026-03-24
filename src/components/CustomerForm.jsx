@@ -36,15 +36,15 @@ export default function CustomerForm() {
 
   const handleCreateNew = async (e) => {
     e.preventDefault()
-    if (!newCustomer.nombre || !newCustomer.telefono) {
-      alert('Nombre y teléfono son obligatorios')
+    if (!newCustomer.nombre) {
+      alert('El nombre es obligatorio')
       return
     }
     setLoading(true)
-    const cleanPhone = newCustomer.telefono.replace(/\s+/g, '')
+    const cleanPhone = newCustomer.telefono.trim() || null
     const { data, error } = await supabase
       .from('customers')
-      .insert({ ...newCustomer, telefono: cleanPhone })
+      .insert({ nombre: newCustomer.nombre, telefono: cleanPhone })
       .select()
       .single()
     
@@ -113,11 +113,10 @@ export default function CustomerForm() {
               />
               <input
                 type="tel"
-                placeholder="Teléfono (WhatsApp)"
+                placeholder="Teléfono (Opcional)"
                 value={newCustomer.telefono}
                 onChange={e => setNewCustomer({...newCustomer, telefono: e.target.value})}
                 className="w-full rounded-3xl px-6 py-4 border border-slate-200"
-                required
               />
               <button
                 type="submit"
