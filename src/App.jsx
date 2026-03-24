@@ -5,7 +5,7 @@ import ProductList from './components/ProductList'
 import Cart from './components/Cart'
 import CustomerForm from './components/CustomerForm'
 import Dashboard from './components/Dashboard'
-import { generatePDF } from './lib/pdf'
+import { generatePDF } from './lib/pdf.js'
 
 const AppContext = createContext()
 
