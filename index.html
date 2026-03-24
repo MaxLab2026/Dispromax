@@ -365,3 +365,14 @@ function addCarrito(id){
     item.qty++;
   }else{
     carrito.push({
+<h2>Carrito</h2>
+<div id="carrito"></div>
+
+<h2>Cliente</h2>
+<select id="clienteSelect"></select>
+
+<button onclick="crearPedido()">Confirmar Pedido</button>
+
+<h2>Pedidos</h2>
+<button onclick="cargarPedidos()">Ver pedidos</button>
+<div id="pedidos"></div>
