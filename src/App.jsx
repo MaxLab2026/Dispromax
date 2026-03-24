@@ -1,3 +1,4 @@
+// src/App.jsx
 import { useState, useEffect, createContext, useContext } from 'react'
 import { supabase } from './lib/supabase'
 import CategoryFilter from './components/CategoryFilter'
@@ -8,7 +9,6 @@ import Dashboard from './components/Dashboard'
 import { generatePDF } from './lib/pdf.js'
 
 const AppContext = createContext()
-
 export const useApp = () => useContext(AppContext)
 
 function App() {
@@ -23,28 +23,49 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [discount, setDiscount] = useState({ type: 'percent', value: 0 })
 
-  // Cargar categorías y productos al iniciar
+  // 🔄 Persistencia del carrito y cliente
+  useEffect(() => {
+    const savedCart = localStorage.getItem('cart')
+    const savedCustomer = localStorage.getItem('customer')
+    if (savedCart) setCart(JSON.parse(savedCart))
+    if (savedCustomer) setCustomer(JSON.parse(savedCustomer))
+  }, [])
+
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(cart))
+  }, [cart])
+
+  useEffect(() => {
+    if (customer) localStorage.setItem('customer', JSON.stringify(customer))
+  }, [customer])
+
+  // 📦 Cargar categorías y productos al iniciar
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true)
-      
-      const { data: cats } = await supabase
-        .from('categories')
-        .select('*')
-        .order('name')
-      
-      const { data: prods } = await supabase
-        .from('products')
-        .select('*, categories(name)')
-        .order('nombre')
-      
-      setCategories([{ id: 'all', name: 'Todos' }, ...(cats || [])])
-      setProducts(prods || [])
-      setLoading(false)
+      try {
+        const { data: cats } = await supabase
+          .from('categories')
+          .select('*')
+          .order('name')
+
+        const { data: prods } = await supabase
+          .from('products')
+          .select('*, categories(name)')
+          .order('nombre')
+
+        setCategories([{ id: 'all', name: 'Todos' }, ...(cats || [])])
+        setProducts(prods || [])
+      } catch (err) {
+        console.error('Error cargando datos:', err.message)
+      } finally {
+        setLoading(false)
+      }
     }
     fetchData()
   }, [])
 
+  // 🛒 Funciones de carrito
   const addToCart = (product) => {
     const existing = cart.find(item => item.product_id === product.id)
     const newQty = existing ? existing.cantidad + 1 : 1
@@ -73,13 +94,11 @@ function App() {
 
   const updateCartQty = (productId, newQty) => {
     if (newQty < 1) return removeFromCart(productId)
-    
     const product = products.find(p => p.id === productId)
     if (newQty > product.stock) {
       alert('❌ Stock insuficiente')
       return
     }
-
     setCart(cart.map(item =>
       item.product_id === productId
         ? { ...item, cantidad: newQty, subtotal: newQty * item.precio_unitario }
@@ -95,13 +114,17 @@ function App() {
     setCart([])
     setCustomer(null)
     setDiscount({ type: 'percent', value: 0 })
+    localStorage.removeItem('cart')
+    localStorage.removeItem('customer')
   }
 
+  // 💰 Totales y descuentos
   const cartTotal = cart.reduce((acc, item) => acc + item.subtotal, 0)
   let finalTotal = cartTotal
   if (discount.type === 'percent') finalTotal = cartTotal * (1 - discount.value / 100)
   else if (discount.type === 'fixed') finalTotal = Math.max(0, cartTotal - discount.value)
 
+  // 📝 Crear pedido
   const createOrder = async () => {
     if (cart.length === 0) return alert('❌ El carrito está vacío')
     if (!customer) {
@@ -131,14 +154,12 @@ function App() {
         precio_unitario: item.precio_unitario,
         subtotal: item.subtotal
       }))
-
       await supabase.from('order_items').insert(itemsToInsert)
 
-      // Guardar el pedido en el contexto para usarlo en Cart/Dashboard
       setCurrentOrder(order)
-
       alert(`✅ Pedido #${order.id} creado correctamente`)
 
+      // Enviar resumen por WhatsApp
       const message = `Pedido #${order.id}\nCliente: ${customer.nombre}\nTotal: $${finalTotal.toLocaleString('es-CO')}\nProductos:\n${cart.map(i => `${i.cantidad} × ${i.nombre}`).join('\n')}`
       const phone = customer.telefono.replace(/\D/g, '')
       window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank')
@@ -151,6 +172,7 @@ function App() {
     }
   }
 
+  // 📦 Contexto global
   const contextValue = {
     categories,
     products,
@@ -225,19 +247,4 @@ function App() {
                   <ProductList />
                 </div>
               </div>
-              <div className="w-full lg:w-96 bg-white border-l flex flex-col">
-                <Cart />
-              </div>
-            </div>
-          )}
-
-          {view === 'dashboard' && <Dashboard />}
-        </div>
-
-        {showCustomerModal && <CustomerForm />}
-      </div>
-    </AppContext.Provider>
-  )
-}
-
-export default App
+              <div className="w-full lg:w-96
