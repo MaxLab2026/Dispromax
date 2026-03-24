@@ -1,3 +1,4 @@
+// src/components/ProductList.jsx
 import { useApp } from '../App'
 
 export default function ProductList() {
@@ -13,15 +14,23 @@ export default function ProductList() {
         <div key={product.id} className="card p-4 flex flex-col">
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1">
-              <h3 className="font-semibold text-base leading-tight pr-2">{product.nombre}</h3>
-              <p className="text-xs text-slate-400 mt-1">{product.categories?.name || ''}</p>
+              <h3 className="font-semibold text-base leading-tight pr-2">
+                {product.nombre || 'Sin nombre'}
+              </h3>
+              <p className="text-xs text-slate-400 mt-1">
+                {product.categories?.name || 'Sin categoría'}
+              </p>
             </div>
             <div className="text-right">
               <p className="text-2xl font-bold text-primary">
-                ${product.precio_venta.toLocaleString('es-CO')}
+                ${(product.precio_venta || 0).toLocaleString('es-CO')}
               </p>
-              <p className={`text-xs mt-1 ${product.stock <= (product.stock_min || 5) ? 'text-red-500' : 'text-emerald-500'}`}>
-                Stock: {product.stock} {product.unidad || 'und'}
+              <p className={`text-xs mt-1 ${
+                (product.stock || 0) <= (product.stock_min || 5) 
+                  ? 'text-red-500' 
+                  : 'text-emerald-500'
+              }`}>
+                Stock: {product.stock || 0} {product.unidad || 'und'}
               </p>
             </div>
           </div>
