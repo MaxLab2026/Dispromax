@@ -134,6 +134,9 @@ function App() {
 
       await supabase.from('order_items').insert(itemsToInsert)
 
+      // Guardar el pedido en el contexto para usarlo en Cart/Dashboard
+      setCurrentOrder(order)
+
       alert(`✅ Pedido #${order.id} creado correctamente`)
 
       const message = `Pedido #${order.id}\nCliente: ${customer.nombre}\nTotal: $${finalTotal.toLocaleString('es-CO')}\nProductos:\n${cart.map(i => `${i.cantidad} × ${i.nombre}`).join('\n')}`
@@ -170,7 +173,9 @@ function App() {
     setShowCustomerModal,
     view,
     setView,
-    generatePDF
+    generatePDF,
+    currentOrder,
+    setCurrentOrder
   }
 
   return (
