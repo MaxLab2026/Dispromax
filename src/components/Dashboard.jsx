@@ -12,6 +12,12 @@ export default function Dashboard() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [loading, setLoading] = useState(true)
 
+  // Modal de pagos
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const [currentOrder, setCurrentOrder] = useState(null)
+  const [paymentAmount, setPaymentAmount] = useState(0)
+  const [paymentMethod, setPaymentMethod] = useState('efectivo')
+
   useEffect(() => {
     fetchOrders()
   }, [])
@@ -22,13 +28,14 @@ export default function Dashboard() {
       .from('orders')
       .select(`
         *,
-        customers(nombre, telefono),   -- ✅ tabla relacionada
+        customers(nombre, telefono),
         order_items (
           cantidad,
           precio_unitario,
           subtotal,
           products (nombre)
-        )
+        ),
+        payments (monto, fecha_pago, metodo)
       `)
       .order('created_at', { ascending: false })
     
@@ -53,23 +60,49 @@ export default function Dashboard() {
       result = result.filter(o => o.created_at && new Date(o.created_at) <= new Date(dateTo))
     }
     if (statusFilter !== 'all') {
-      result = result.filter(o => o.estado === statusFilter)
+      result = result.filter(o => {
+        const totalPagado = o.payments?.reduce((acc, p) => acc + p.monto, 0) || 0
+        const saldoPendiente = (o.total || 0) - totalPagado
+        const estado = saldoPendiente === 0 ? 'pagado' :
+                       saldoPendiente < (o.total || 0) ? 'parcial' : 'pendiente'
+        return estado === statusFilter
+      })
     }
 
     setFilteredOrders(result)
   }, [orders, dateFrom, dateTo, statusFilter])
 
-  // Estadísticas
-  const totalVentas = filteredOrders.reduce((acc, o) => acc + (o.estado !== 'pendiente' ? (o.total || 0) : 0), 0)
+  // Estadísticas dinámicas
+  const totalVentas = filteredOrders.reduce((acc, o) => {
+    const totalPagado = o.payments?.reduce((sum, p) => sum + p.monto, 0) || 0
+    return acc + totalPagado
+  }, 0)
   const totalPedidos = filteredOrders.length
-  const pendientes = filteredOrders.filter(o => o.estado === 'pendiente').length
-  const pagados = filteredOrders.filter(o => o.estado === 'pagado').length
+  const pendientes = filteredOrders.filter(o => {
+    const totalPagado = o.payments?.reduce((sum, p) => sum + p.monto, 0) || 0
+    return totalPagado === 0
+  }).length
+  const pagados = filteredOrders.filter(o => {
+    const totalPagado = o.payments?.reduce((sum, p) => sum + p.monto, 0) || 0
+    return totalPagado >= (o.total || 0)
+  }).length
 
-  const handleStatusChange = async (orderId, newStatus) => {
-    await supabase
-      .from('orders')
-      .update({ estado: newStatus })
-      .eq('id', orderId)
+  // Registrar pago
+  const handleAddPayment = async () => {
+    if (!currentOrder) return
+    if (paymentAmount <= 0) {
+      alert('Monto inválido')
+      return
+    }
+
+    await supabase.from('payments').insert({
+      order_id: currentOrder.id,
+      monto: paymentAmount,
+      metodo: paymentMethod
+    })
+
+    setShowPaymentModal(false)
+    setPaymentAmount(0)
     fetchOrders()
   }
 
@@ -120,54 +153,33 @@ export default function Dashboard() {
                 <th className="text-left px-8 py-5">Cliente</th>
                 <th className="text-left px-8 py-5">Fecha</th>
                 <th className="text-right px-8 py-5">Total</th>
+                <th className="text-right px-8 py-5">Pagado</th>
+                <th className="text-right px-8 py-5">Saldo</th>
                 <th className="px-8 py-5">Estado</th>
                 <th className="px-8 py-5 w-40">Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {filteredOrders.map(order => (
-                <tr key={order.id} className="border-t hover:bg-slate-50">
-                  <td className="px-8 py-5 font-medium">#{order.id}</td>
-                  <td className="px-8 py-5">{order.customers?.nombre || 'Sin cliente'}</td>
-                  <td className="px-8 py-5 text-slate-400 text-sm">
-                    {order.created_at ? new Date(order.created_at).toLocaleDateString('es-CO') : 'Sin fecha'}
-                  </td>
-                  <td className="px-8 py-5 text-right font-semibold">
-                    ${(order.total || 0).toLocaleString('es-CO')}
-                  </td>
-                  <td className="px-8 py-5">
-                    <select
-                      value={order.estado}
-                      onChange={e => handleStatusChange(order.id, e.target.value)}
-                      className={`text-xs font-medium px-4 py-1 rounded-3xl ${
-                        order.estado === 'pagado' ? 'bg-emerald-100 text-emerald-700' :
-                        order.estado === 'parcial' ? 'bg-amber-100 text-amber-700' :
-                        'bg-orange-100 text-orange-700'
-                      }`}
-                    >
-                      <option value="pendiente">Pendiente</option>
-                      <option value="parcial">Parcial</option>
-                      <option value="pagado">Pagado</option>
-                    </select>
-                  </td>
-                  <td className="px-8 py-5">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => generatePDF('factura', order, order.customers, order.order_items || [])}
-                        className="text-xs bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-2xl"
-                      >
-                        PDF
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <p className="p-8 text-slate-400">No hay pedidos</p>
-        )}
-      </div>
-    </div>
-  )
-}
+              {filteredOrders.map(order => {
+                const totalPagado = order.payments?.reduce((acc, p) => acc + p.monto, 0) || 0
+                const saldoPendiente = (order.total || 0) - totalPagado
+                const estado = saldoPendiente === 0 ? 'pagado' :
+                               saldoPendiente < (order.total || 0) ? 'parcial' : 'pendiente'
+
+                return (
+                  <tr key={order.id} className="border-t hover:bg-slate-50">
+                    <td className="px-8 py-5 font-medium">#{order.id}</td>
+                    <td className="px-8 py-5">{order.customers?.nombre || 'Sin cliente'}</td>
+                    <td className="px-8 py-5 text-slate-400 text-sm">
+                      {order.created_at ? new Date(order.created_at).toLocaleDateString('es-CO') : 'Sin fecha'}
+                    </td>
+                    <td className="px-8 py-5 text-right font-semibold">
+                      ${(order.total || 0).toLocaleString('es-CO')}
+                    </td>
+                    <td className="px-8 py-5 text-right text-emerald-600">
+                      ${totalPagado.toLocaleString('es-CO')}
+                    </td>
+                    <td className="px-8 py-5 text-right text-orange-600">
+                      ${saldoPendiente.toLocaleString('es-CO')}
+                    </td>
+                    <td className
