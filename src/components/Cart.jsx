@@ -112,7 +112,7 @@ const handleDiscountChange = (e) => {
       <div className="p-6 border-t bg-white space-y-3">
         {!customer && (
           <button
-            onClick={() => { /* modal se abre desde header */ }}
+            onClick={() => setShowCustomerModal(true)} //
             className="w-full btn-secondary"
           >
             👤 Seleccionar cliente
