@@ -60,14 +60,36 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;color:var(--tx);
 
 /* ── CARDS & KPIs ───────────────────────────────────────── */
 .card{background:white;border-radius:var(--r);box-shadow:var(--sh);padding:14px;margin-bottom:10px;position:relative;overflow:hidden;}
+.card-sm{background:var(--bg);border-radius:var(--r2);padding:10px;border:1px solid var(--bg2);}
 .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
 .kpi{background:white;border-radius:var(--r);box-shadow:var(--sh);padding:12px;border-left:4px solid var(--az);}
 .kpi.red{border-left-color:var(--rj);}
 .kpi.green{border-left-color:var(--ok);}
+.kpi.warn{border-left-color:var(--warn);}
 .kpi-val{font-size:1.2rem;font-weight:700;color:var(--az);line-height:1;margin-bottom:3px;}
 .kpi-lbl{font-size:.67rem;color:var(--tx2);}
 
-/* ── FORMULARIOS & INPUTS ───────────────────────────────── */
+/* ── TABLAS & LISTAS ────────────────────────────────────── */
+.list-item{display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid var(--bg2);}
+.list-item:last-child{border-bottom:none;}
+.list-info{flex:1;}
+.list-title{font-weight:700;color:var(--az);font-size:.9rem;}
+.list-sub{font-size:.75rem;color:var(--tx2);margin-top:1px;}
+.list-side{text-align:right;}
+.tag{display:inline-block;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;}
+.tag-ok{background:rgba(39,174,96,.1);color:var(--ok);}
+.tag-warn{background:rgba(243,156,18,.1);color:var(--warn);}
+.tag-err{background:rgba(192,57,43,.1);color:var(--err);}
+
+/* ── BOTONES ────────────────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 16px;border-radius:var(--r2);font-size:.84rem;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .15s;}
+.btn-p{background:var(--az);color:white;}.btn-p:active{background:var(--az2);}
+.btn-r{background:var(--rj);color:white;}.btn-r:active{background:var(--rj2);}
+.btn-s{background:var(--bg);border:1px solid var(--bg2);color:var(--tx);}
+.btn-full{width:100%;}
+.btn-icon{width:34px;height:34px;padding:0;border-radius:50%;}
+
+/* ── FORMULARIOS ────────────────────────────────────────── */
 .fgroup{margin-bottom:11px;}
 .lbl{display:block;font-size:.7rem;font-weight:600;color:var(--az);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
 .inp{width:100%;background:var(--bg);border:1.5px solid var(--bg2);color:var(--tx);padding:10px 12px;border-radius:var(--r2);font-size:.9rem;font-family:inherit;outline:none;}
@@ -75,39 +97,47 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;color:var(--tx);
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .span2{grid-column:1/-1;}
 
-/* ── MODALES ────────────────────────────────────────────── */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center;z-index:100;}
+/* ── MODALES (BOTTOM SHEETS) ────────────────────────────── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center;z-index:100;backdrop-filter:blur(2px);}
 .overlay.open{display:flex;}
-.modal{background:white;border-radius:20px 20px 0 0;padding:18px 14px 28px;width:100%;max-width:560px;max-height:93vh;overflow-y:auto;position:relative;}
+.modal{background:white;border-radius:20px 20px 0 0;padding:18px 14px 28px;width:100%;max-width:560px;max-height:93vh;overflow-y:auto;position:relative;animation:slideUp .3s ease-out;}
+@keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
 .modal-handle{width:36px;height:4px;background:var(--bg2);border-radius:2px;margin:0 auto 14px;}
-
-/* ── BOTONES ────────────────────────────────────────────── */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 16px;border-radius:var(--r2);font-size:.84rem;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
-.btn-p{background:var(--az);color:white;}
-.btn-r{background:var(--rj);color:white;}
-.btn-s{background:var(--bg);border:1px solid var(--bg2);color:var(--tx);}
-.btn-full{width:100%;}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
 
 /* ── FAB ────────────────────────────────────────────────── */
-.fab{position:fixed;bottom:68px;right:14px;width:52px;height:52px;border-radius:50%;background:var(--rj);color:white;border:none;font-size:1.5rem;box-shadow:0 4px 20px rgba(192,57,43,.45);display:flex;align-items:center;justify-content:center;z-index:50;}
+.fab{position:fixed;bottom:68px;right:14px;width:52px;height:52px;border-radius:50%;background:var(--rj);color:white;border:none;font-size:1.5rem;cursor:pointer;box-shadow:0 4px 20px rgba(192,57,43,.45);display:flex;align-items:center;justify-content:center;z-index:50;transition:transform .15s;}
+.fab:active{transform:scale(.92);}
 
-/* ── OFFLINE BANNER ─────────────────────────────────────── */
+/* ── SEARCH ─────────────────────────────────────────────── */
+.search-wrap{position:sticky;top:0;background:var(--bg);padding:10px 0;z-index:10;margin-bottom:5px;}
+
+/* ── OFFLINE ────────────────────────────────────────────── */
 #offline-banner{background:var(--warn);color:white;text-align:center;padding:5px;font-size:.75rem;font-weight:600;display:none;}
 #offline-banner.show{display:block;}
 
+/* Estilos específicos de productos */
+.prod-card{background:white;border-radius:var(--r);padding:10px;margin-bottom:8px;display:flex;gap:12px;box-shadow:var(--sh);}
+.prod-img{width:60px;height:60px;background:var(--bg);border-radius:var(--r2);display:flex;align-items:center;justify-content:center;font-size:24px;overflow:hidden;}
+.prod-img img{width:100%;height:100%;object-fit:cover;}
+.prod-info{flex:1;}
+.prod-nombre{font-weight:700;color:var(--az);font-size:.95rem;}
+.prod-precios{display:flex;gap:10px;margin-top:4px;}
+.prod-precio{font-size:.8rem;font-weight:600;}
+.prod-stock{font-size:.75rem;color:var(--tx2);margin-top:2px;}
 </style>
 </head>
 <body>
 
-<div id="offline-banner"> 📡 Sin conexión — modo offline</div>
+<div id="offline-banner"> 📡 Sin conexión — trabajando en modo offline</div>
 
 <div id="header">
-  <svg id="header-logo" viewBox="0 0 200 80" height="38">
+  <svg id="header-logo" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg" height="38">
     <polygon points="30,5 55,5 70,28 55,51 30,51 15,28" fill="none" stroke="#c0392b" stroke-width="3.5"/>
     <rect x="28" y="18" width="16" height="14" rx="2" fill="#c0392b"/>
     <text x="75" y="32" font-family="Arial" font-weight="800" font-size="18" fill="white">DISPRO</text>
     <text x="130" y="32" font-family="Arial" font-weight="800" font-size="18" fill="#c0392b">MAX</text>
-    <text x="75" y="48" font-family="Arial" font-size="8.5" fill="rgba(255,255,255,0.75)">LOGÍSTICA HORECA | ATLÁNTICO</text>
+    <text x="75" y="48" font-family="Arial" font-size="8.5" fill="rgba(255,255,255,0.75)" letter-spacing="0.5">LOGÍSTICA HORECA | ATLÁNTICO</text>
   </svg>
   <div id="header-right">
     <button class="hbtn" onclick="go('config',document.querySelector('.nav-btn:last-child'))"> ⚙️ </button>
@@ -127,61 +157,54 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;color:var(--tx);
 <div id="content">
   <div id="page-dash" class="page active">
     <p class="pg-title">Panel de control</p>
+    <p class="pg-sub">Resumen operativo de hoy</p>
+    <div id="dash-alertas"></div>
     <div class="kpi-grid" id="kpis">
-      <div class="kpi"><div class="kpi-val" id="dash-pedidos-count">0</div><div class="kpi-lbl">Pedidos Hoy</div></div>
-      <div class="kpi green"><div class="kpi-val" id="dash-ventas-hoy">$0</div><div class="kpi-lbl">Ventas Hoy</div></div>
+        <div class="kpi"><div class="kpi-val" id="kpi-pedidos">0</div><div class="kpi-lbl">Pedidos Hoy</div></div>
+        <div class="kpi green"><div class="kpi-val" id="kpi-ventas">$0</div><div class="kpi-lbl">Ventas Hoy</div></div>
     </div>
-    <div class="card"><h3> 📈 Ventas del mes</h3><div id="dash-grafico"></div></div>
-    <div class="card"><h3> 🕐 Pedidos recientes</h3><div id="dash-lista-pedidos"></div></div>
-  </div>
-
-  <div id="page-pedidos-nueva" class="page">
-    <p class="pg-title">Nuevo Pedido</p>
-    <div class="card">
-      <div class="fgroup"><label class="lbl">Cliente</label><select class="inp" id="ped-cliente"><option value="">Selecciona cliente...</option></select></div>
-      <div class="grid2">
-        <div class="fgroup"><label class="lbl">Fecha Entrega</label><input type="date" class="inp" id="ped-fecha"/></div>
-        <div class="fgroup"><label class="lbl">Estado</label><select class="inp" id="ped-estado"><option>Pendiente</option><option>Entregado</option></select></div>
-      </div>
-    </div>
-    <div id="ped-items"></div>
-    <button class="btn btn-p btn-full" onclick="guardarPedido()">GUARDAR PEDIDO</button>
+    <div class="card"><h3> 📈 Ventas del mes</h3><div id="dash-cats"></div></div>
+    <div class="card"><h3> ⭐ Productos favoritos</h3><div id="dash-favs"></div></div>
   </div>
 
   <div id="page-productos" class="page">
     <p class="pg-title">Productos</p>
-    <input class="inp" id="prod-search" placeholder="Buscar producto..." oninput="rProductos()"/>
-    <div id="prod-list" style="margin-top:15px;"></div>
+    <div class="search-wrap"><input class="inp" id="prod-search" placeholder="Buscar..." oninput="rProductos()"/></div>
+    <div id="prod-list"></div>
   </div>
 
   <div id="page-clientes" class="page">
     <p class="pg-title">Clientes</p>
+    <div class="search-wrap"><input class="inp" id="cli-search" placeholder="Buscar cliente..." oninput="rClientes()"/></div>
     <div id="cli-list"></div>
   </div>
 
-  <div id="page-proveedores" class="page">
-    <p class="pg-title">Proveedores</p>
-    <div id="prov-list"></div>
+  <div id="page-config" class="page">
+    <p class="pg-title">Configuración</p>
+    <div class="card">
+        <label class="lbl">URL de Supabase</label>
+        <input class="inp" value="https://cosxgumrxgihkeszvgwu.supabase.co" readonly>
+    </div>
   </div>
 </div>
 
 <div class="overlay" id="m-producto">
   <div class="modal">
     <div class="modal-handle"></div>
-    <h3>Gestionar Producto</h3>
+    <div class="modal-header"><h3>Nuevo producto</h3><button class="btn btn-s btn-icon" onclick="cerrar('m-producto')">✕</button></div>
     <div class="grid2">
-      <div class="fgroup span2"><label class="lbl">Nombre</label><input class="inp" id="mp-nombre"/></div>
-      <div class="fgroup"><label class="lbl">Precio Venta</label><input type="number" class="inp" id="mp-pventa"/></div>
-      <div class="fgroup"><label class="lbl">Stock</label><input type="number" class="inp" id="mp-stock"/></div>
+      <div class="fgroup span2"><label class="lbl">Nombre *</label><input class="inp" id="mp-nombre"/></div>
+      <div class="fgroup"><label class="lbl">Precio Venta</label><input class="inp" id="mp-pventa" type="number"/></div>
+      <div class="fgroup"><label class="lbl">Stock Inicial</label><input class="inp" id="mp-stock" type="number"/></div>
     </div>
-    <div style="display:flex;gap:10px;margin-top:20px;">
-      <button class="btn btn-s" onclick="cerrar('m-producto')">Cerrar</button>
-      <button class="btn btn-p" style="flex:1" onclick="upsertProducto()">Guardar</button>
+    <div style="display:flex;gap:8px;margin-top:15px;">
+      <button class="btn btn-s btn-full" onclick="cerrar('m-producto')">Cancelar</button>
+      <button class="btn btn-p btn-full" onclick="guardarProducto()">Guardar</button>
     </div>
   </div>
 </div>
 
-<button class="fab" onclick="abrir('m-producto')"> ＋ </button>
+<button class="fab" id="fab-main" onclick="abrir('m-producto')"> ＋ </button>
 
 <script>
 // ════════════════════════════════════════════════════════════
@@ -192,7 +215,7 @@ const SUPABASE_KEY = 'sb_publishable_B58gh4o9vrHK58hNramtGw_yRck0jwX';
 
 const sb = {
   async req(method, path, body = null, params = null) {
-    let url = `${SUPABASE_URL}/rest/v1/${path}`; // Backticks corregidos
+    let url = `${SUPABASE_URL}/rest/v1/${path}`; 
     if (params) url += '?' + new URLSearchParams(params);
     
     const opts = {
@@ -201,7 +224,7 @@ const sb = {
         'apikey': SUPABASE_KEY,
         'Authorization': `Bearer ${SUPABASE_KEY}`,
         'Content-Type': 'application/json',
-        'Prefer': 'return=representation'
+        'Prefer': method === 'POST' ? 'return=representation' : 'return=representation'
       }
     };
     if (body) opts.body = JSON.stringify(body);
@@ -218,8 +241,8 @@ const sb = {
   },
   select: (t, q = '*', p = {}) => sb.req('GET', t, null, { select: q, ...p }),
   insert: (t, b) => sb.req('POST', t, Array.isArray(b) ? b : [b]),
-  update: (t, b, f) => sb.req('PATCH', `${t}?${f}`, b), // Backticks corregidos
-  delete: (t, f) => sb.req('DELETE', `${t}?${f}`)    // Backticks corregidos
+  update: (t, b, f) => sb.req('PATCH', `${t}?${f}`, b),
+  delete: (t, f) => sb.req('DELETE', `${t}?${f}`)
 };
 
 // Navegación
@@ -235,33 +258,32 @@ function go(id, btn) {
 function abrir(id) { document.getElementById(id).classList.add('open'); }
 function cerrar(id) { document.getElementById(id).classList.remove('open'); }
 
-// Carga de Productos con corrección de foto_url
+// Carga de Productos
 async function rProductos() {
   const { data, error } = await sb.select('productos');
   if (error) return;
   const cont = document.getElementById('prod-list');
   cont.innerHTML = data.map(p => `
-    <div class="card" style="display:flex; gap:12px; align-items:center;">
-      <div style="width:50px; height:50px; background:var(--bg2); border-radius:8px; display:flex; align-items:center; justify-content:center;">
-        ${p.foto_url ? `<img src="${p.foto_url}" style="width:100%; height:100%; border-radius:8px; object-fit:cover;"/>` : '📦'}
-      </div>
-      <div style="flex:1;">
-        <div style="font-weight:700; color:var(--az);">${p.nombre}</div>
-        <div style="font-size:0.75rem; color:var(--tx2);">Stock: ${p.stock} | $${p.precio_venta}</div>
+    <div class="prod-card">
+      <div class="prod-img">${p.foto_url ? `<img src="${p.foto_url}"/>` : '📦'}</div>
+      <div class="prod-info">
+        <div class="prod-nombre">${p.nombre}</div>
+        <div class="prod-precios">
+          <span class="prod-precio" style="color:var(--ok)">$${p.precio_venta}</span>
+        </div>
+        <div class="prod-stock">Stock: ${p.stock}</div>
       </div>
     </div>
   `).join('');
 }
 
 // Inicialización
-window.onload = () => {
-  rProductos();
-};
+window.onload = () => { rProductos(); };
 
 // Service Worker
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js')
-    .then(() => console.log('SW activo'))
+    .then(() => console.log('Service Worker registrado'))
     .catch(err => console.error('Error SW:', err));
 }
 </script>
