@@ -1,19 +1,4 @@
-// PWA — OFFLINE
-// ════════════════════════════════════════════════════════════
-window.addEventListener('online',  ()=>{ document.getElementById('offline-banner').classList.remove('show'); toast('✅ Conexión restaurada'); cargarDatos(); });
-window.addEventListener('offline', ()=>{ document.getElementById('offline-banner').classList.add('show'); toast('📡 Sin conexión — modo offline','err'); });
 
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js').catch(()=>{});
-}
-
-// ════════════════════════════════════════════════════════════
-// INIT
-// ════════════════════════════════════════════════════════════
-window.addEventListener('load', cargarDatos);
-</script>
-</body>
-</html>
 // ============================================================
 // DISPROMAX — Service Worker (PWA Offline)
 // ============================================================
