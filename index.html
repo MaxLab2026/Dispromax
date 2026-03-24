@@ -1497,5 +1497,36 @@ if('serviceWorker' in navigator){
 // ════════════════════════════════════════════════════════════
 window.addEventListener('load', cargarDatos);
 </script>
+  <script type="module">
+  import { supabase } from './supabase.js'
+
+  async function rProductos() {
+    const { data, error } = await supabase.from('products').select('*')
+    if (error) {
+      console.error("Error al traer productos:", error)
+      return
+    }
+    const cont = document.getElementById('prod-list')
+    cont.innerHTML = data.map(p => `
+      <div class="prod-card">
+        <div class="prod-img">${p.foto_url ? `<img src="${p.foto_url}"/>` : '📦'}</div>
+        <div class="prod-info">
+          <div class="prod-nombre">${p.nombre}</div>
+          <div class="prod-codigo">${p.codigo || ''}</div>
+          <div class="prod-precios">
+            <span class="prod-precio">Compra: $${p.precio_compra}</span>
+            <span class="prod-precio">Venta: $${p.precio_venta}</span>
+          </div>
+          <div class="prod-stock">Stock: ${p.stock}</div>
+        </div>
+      </div>
+    `).join('')
+  }
+
+  rProductos()
+</script>
+</body>
+</html>
+
 </body>
 </html>
