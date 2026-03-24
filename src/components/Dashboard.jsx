@@ -22,7 +22,7 @@ export default function Dashboard() {
       .from('orders')
       .select(`
         *,
-        customers(nombre, telefono),
+        customers(nombre, telefono),   -- ✅ tabla relacionada
         order_items (
           cantidad,
           precio_unitario,
@@ -162,3 +162,12 @@ export default function Dashboard() {
                   </td>
                 </tr>
               ))}
+            </tbody>
+          </table>
+        ) : (
+          <p className="p-8 text-slate-400">No hay pedidos</p>
+        )}
+      </div>
+    </div>
+  )
+}
