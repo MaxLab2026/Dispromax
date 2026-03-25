@@ -1,50 +1,73 @@
-// src/components/CategoryFilter.jsx
+import { useEffect, useRef } from 'react'
 import { useApp } from '../App'
 
 export default function CategoryFilter() {
   const { categories, selectedCategory, setSelectedCategory, products } = useApp()
+  const activeRef = useRef(null)
 
-  // Contar productos por categoría
+  // Desplaza el botón activo a la vista automáticamente
+  useEffect(() => {
+    if (activeRef.current) {
+      activeRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+    }
+  }, [selectedCategory])
+
   const countByCategory = (catId) =>
     products.filter(p => p.category_id === catId).length
 
+  // Filtrar el botón "Todos" que viene en el array de categories desde App
+  const realCategories = categories.filter(c => c.id !== 'all')
+
   return (
-    <div className="px-6 pt-6 pb-4 border-b bg-white sticky top-0 z-40">
-      <h2 className="text-xs uppercase tracking-widest text-slate-400 mb-3">Categorías</h2>
-      <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
-        {/* Botón Todos */}
+    <div className="px-4 py-3 border-b bg-white sticky top-0 z-40">
+      <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
+
+        {/* Todos */}
         <button
+          ref={selectedCategory === 'all' ? activeRef : null}
           onClick={() => setSelectedCategory('all')}
-          aria-pressed={selectedCategory === 'all'}
-          className={`px-6 py-3 whitespace-nowrap rounded-3xl text-sm font-medium transition-all flex-shrink-0 ${
+          className={`px-5 py-2.5 whitespace-nowrap rounded-2xl text-sm font-medium transition-all flex-shrink-0 ${
             selectedCategory === 'all'
-              ? 'bg-primary text-white shadow-lg'
-              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              ? 'bg-primary text-white shadow-md'
+              : 'bg-slate-100 text-slate-600'
           }`}
         >
-          {selectedCategory === 'all' && '✔️ '}
-          Todos ({products.length})
+          Todos
+          <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${
+            selectedCategory === 'all'
+              ? 'bg-white/20 text-white'
+              : 'bg-slate-200 text-slate-500'
+          }`}>
+            {products.length}
+          </span>
         </button>
 
-        {categories?.length > 0 ? (
-          categories.map(cat => (
+        {realCategories.map(cat => {
+          const count = countByCategory(cat.id)
+          const isActive = selectedCategory === cat.id
+          return (
             <button
               key={cat.id}
+              ref={isActive ? activeRef : null}
               onClick={() => setSelectedCategory(cat.id)}
-              aria-pressed={selectedCategory === cat.id}
-              className={`px-6 py-3 whitespace-nowrap rounded-3xl text-sm font-medium transition-all flex-shrink-0 ${
-                selectedCategory === cat.id 
-                  ? 'bg-primary text-white shadow-lg'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              className={`px-5 py-2.5 whitespace-nowrap rounded-2xl text-sm font-medium transition-all flex-shrink-0 ${
+                isActive
+                  ? 'bg-primary text-white shadow-md'
+                  : 'bg-slate-100 text-slate-600'
               }`}
             >
-              {selectedCategory === cat.id && '✔️ '}
-              {cat.name || cat.nombre || 'Sin nombre'} ({countByCategory(cat.id)})
+              {cat.name || cat.nombre || 'Sin nombre'}
+              <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${
+                isActive
+                  ? 'bg-white/20 text-white'
+                  : 'bg-slate-200 text-slate-500'
+              }`}>
+                {count}
+              </span>
             </button>
-          ))
-        ) : (
-          <span className="text-slate-400 text-sm">No hay categorías</span>
-        )}
+          )
+        })}
+
       </div>
     </div>
   )
